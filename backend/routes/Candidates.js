@@ -23,4 +23,23 @@ router.get('/', async (req, res) => {
   }
 });
 
+// DELETE route to remove a candidate by ID
+router.delete('/candidates/:id', async (req, res) => {
+  const candidateId = req.params.id;
+
+  try {
+    // Find and delete the candidate by ID
+    const deletedCandidate = await Candidate.findByIdAndDelete(candidateId);
+    
+    if (!deletedCandidate) {
+      return res.status(404).json({ message: 'Candidate not found' });
+    }
+
+    res.status(200).json({ message: 'Candidate deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
