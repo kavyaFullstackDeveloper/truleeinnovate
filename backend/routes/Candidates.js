@@ -42,4 +42,33 @@ router.delete('/candidates/:id', async (req, res) => {
   }
 });
 
+// GET candidates with pagination and filters
+router.get('/candidates', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, gender, experience, skills } = req.query;
+
+    // Build the filter object
+    let filter = {};
+    if (gender) filter.gender = gender;
+    if (experience) filter.experience = experience;
+    if (skills) filter.skills = { $in: skills.split(',') };
+
+    // Fetch with pagination and filters
+    const candidates = await Candidate.find(filter)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Candidate.countDocuments(filter);
+
+    res.json({
+      candidates,
+      totalPages: Math.ceil(total / limit),
+      currentPage: parseInt(page),
+    });
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;
